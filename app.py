@@ -1,21 +1,35 @@
-import google.generativeai as genai
+import streamlit as st
+from google import genai
+from PIL import Image
 
-# Configuration de l'IA avec votre clé
-genai.configure(api_key="AIzaSyB-TLylVQ9xfqEGOQEBRa0-8qWf36s-7nE")
-model = genai.GenerativeModel('gemini-1.5-flash')
+# 1. Configuration sécurisée
+try:
+    api_key = st.secrets["GEMINI_API_KEY"]
+    client = genai.Client(api_key=api_key)
+except Exception as e:
+    st.error(f"Erreur de configuration : {e}")
 
-def extraire_donnees_reelles(image_upload):
-    # On convertit l'image pour l'IA
-    img = Image.open(image_upload)
+# 2. Interface Utilisateur
+st.set_page_config(page_title="AIP - Production", layout="wide")
+st.title("🛡️ AIP : Analyse de Production Réelle")
+
+uploaded_file = st.file_uploader("Déposez un scan pour extraction", type=['png', 'jpg', 'jpeg'])
+
+if uploaded_file is not None:
+    img = Image.open(uploaded_file)
+    st.image(img, caption="Document chargé", width=400)
     
-    # On envoie l'image avec une instruction précise (le "Prompt")
-    prompt = """
-    Analyse ce document d'assurance et extrait les informations suivantes sous forme de tableau :
-    - Référence de la police
-    - Nom de l'assuré
-    - Montant de la prime HT
-    Indique aussi si tu vois une signature manuscrite.
-    """
-    
-    response = model.generate_content([prompt, img])
-    return response.text
+    if st.button("Lancer l'extraction intelligente"):
+        with st.spinner("L'IA analyse le document..."):
+            try:
+                # Utilisation de la nouvelle syntaxe 2026
+                response = client.models.generate_content(
+                    model="gemini-2.0-flash",
+                    contents=["Extrait le numéro de police, le nom et le montant de ce document.", img]
+                )
+                
+                st.subheader("Résultat de l'analyse")
+                st.info(response.text)
+                st.success("Traitement terminé !")
+            except Exception as e:
+                st.error(f"Erreur lors de l'analyse : {e}")
