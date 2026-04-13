@@ -1,7 +1,7 @@
 import google.generativeai as genai
 
 # Configuration de l'IA avec votre clé
-genai.configure(api_key="VOTRE_CLE_ICI")
+genai.configure(api_key="AIzaSyB-TLylVQ9xfqEGOQEBRa0-8qWf36s-7nE")
 model = genai.GenerativeModel('gemini-1.5-flash')
 
 def extraire_donnees_reelles(image_upload):
